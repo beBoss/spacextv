@@ -367,3 +367,7 @@ msgstr "Каналите работят отново - пускам %s"
 msgctxt "#30173"
 msgid "Bulsat refuses the channels - is your account in use on another device? Next try in 30 min"
 msgstr "Bulsat отказва каналите - акаунтът ползва ли се на друго устройство? Нов опит след 30 мин."
+
+msgctxt "#30174"
+msgid "The channel stopped - starting it again"
+msgstr "Каналът спря - пускам го отново"

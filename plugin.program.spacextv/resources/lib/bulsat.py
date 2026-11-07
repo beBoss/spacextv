@@ -194,6 +194,11 @@ class Client(object):
         except Exception:
             pass
 
+    @property
+    def session(self):
+        """Our Bulsat session id (kept alive later with keepalive())."""
+        return self.s.headers.get('SSBULSATAPI', '')
+
     # -- low level ---------------------------------------------------------- #
     def _req(self, method, url, **kw):
         kw.setdefault('timeout', self.timeout)
@@ -584,3 +589,40 @@ def playlist_link_state(text, timeout=5.0, n=3):
             if dead >= need:
                 return LINK_DEAD
     return LINK_UNKNOWN
+
+
+# --------------------------------------------------------------------------- #
+# Keep our session alive - like Bulsat's own player
+# --------------------------------------------------------------------------- #
+# Bulsat ends a session about an hour after its last request, and every stream
+# link of that session stops working with it - whatever the link says
+# ("validminutes=600"). Bulsat's web player asks for "now / next" every
+# 5 minutes while you watch; keepalive() does exactly that. It never signs in,
+# so it cannot disturb another device.
+SESSION_OK, SESSION_GONE, SESSION_UNKNOWN = 'ok', 'gone', 'unknown'
+
+
+def keepalive(base, session, user_agent, channel, timeout=10.0):
+    """One tiny request with our session. Returns SESSION_OK, SESSION_GONE (the
+    session has ended - signed in elsewhere or expired) or SESSION_UNKNOWN
+    (no answer - try again later)."""
+    if not session:
+        return SESSION_UNKNOWN
+    url = (base or DEFAULT_BASE).rstrip('/') + '/epg/short'
+    headers = {'User-Agent': user_agent or ANDROID_UA, 'SSBULSATAPI': session,
+               'Accept-Encoding': 'gzip, deflate', 'Accept-Language': 'bg-BG,en-US;q=0.9'}
+    try:
+        r = requests.post(url, data={'epg': 'nownext', 'channel': channel or 'bnt1_hd'},
+                          headers=headers, timeout=timeout)
+    except requests.RequestException:
+        return SESSION_UNKNOWN
+    logged = ''
+    try:
+        d = r.json()
+        if isinstance(d, dict):
+            logged = str(d.get('Logged', d.get('logged', ''))).lower()
+    except ValueError:
+        pass
+    if r.status_code in (401, 403) or logged == 'false':
+        return SESSION_GONE
+    return SESSION_OK if r.status_code == 200 else SESSION_UNKNOWN

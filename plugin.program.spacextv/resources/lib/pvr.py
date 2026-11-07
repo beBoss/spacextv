@@ -230,6 +230,7 @@ _TS = re.compile(r'^(\d{4}-\d\d-\d\d \d\d:\d\d:\d\d)(\.\d+)?')
 _OPEN = re.compile(r'VideoPlayer::OpenFile: (\S+)')
 _STREAM = re.compile(r'Live Stream URL: (\S+)')
 _FAIL = re.compile(r'OpenDemuxStream - Error creating demuxer|OpenInputStream - error opening')
+_EOF = re.compile(r'Process - eof reading from demuxer')     # the stream ran dry (live TV never ends)
 _UID = re.compile(r'_(\d+)\.pvr$')
 
 
@@ -262,8 +263,9 @@ def last_ready():
 
 class PlayWatch(object):
     """Follows Kodi's log (only the new lines, a few bytes every couple of
-    seconds) and remembers the last channel that failed to start:
-    {'when', 'path' (pvr://...), 'url' (the stream link IPTV Simple used)}."""
+    seconds) and remembers the last live channel that failed to start or
+    stopped by itself: {'when', 'path' (pvr://...), 'url' (the stream link
+    IPTV Simple used)}."""
 
     def __init__(self):
         self.pos = _log_size()          # start at the end: only what happens from now on
@@ -272,6 +274,7 @@ class PlayWatch(object):
         self.url = None
         self.last_open = None
         self.failed = None
+        self.ended = None
 
     def poll(self):
         size = _log_size()
@@ -310,10 +313,22 @@ class PlayWatch(object):
                 continue
             if self.last_open and _FAIL.search(line):
                 self.failed = dict(self.last_open, when=_line_time(line))
+            elif self.last_open and _EOF.search(line) and is_live(self.last_open):
+                self.ended = dict(self.last_open, when=_line_time(line))
 
     def take(self):
         f, self.failed = self.failed, None
         return f
+
+    def take_ended(self):
+        e, self.ended = self.ended, None
+        return e
+
+
+def is_live(item):
+    """A live TV/radio channel (not a recording or catch-up programme, which do end)."""
+    path, url = (item or {}).get('path') or '', (item or {}).get('url') or ''
+    return path.startswith('pvr://channels/') and 'wowzadvrplaylist' not in url
 
 
 def channel_group(path):

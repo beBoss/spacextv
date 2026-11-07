@@ -15,10 +15,14 @@ Update strategy (built for slow Android boxes):
     while something is playing (it waits until you stop).
   * Every sign-in gives new links, so a timed refresh never signs in while you
     are watching or using the remote - it waits for a quiet moment.
-  * Bulsat can end a session early (same account signed in on another device),
-    so the links stop working long before "10 h". The link doctor notices it
-    (a channel fails to play, Kodi starts, or a quick check while someone uses
-    Kodi), signs in again, reloads Live TV and restarts the channel you wanted.
+  * Bulsat ends a session about an hour after its last request - and all its
+    links with it, whatever they say. Like Bulsat's own player, SpaceXTV asks
+    "what's on now" every 5 minutes with its session (keep-alive), so the
+    links keep working. It never signs in for that.
+  * Bulsat can still end a session early (same account signed in on another
+    device). The link doctor notices it (a channel fails to play or stops by
+    itself, Kodi starts, a quick check while someone uses Kodi), signs in
+    again, reloads Live TV and starts the channel you were watching.
 """
 
 import json
@@ -60,6 +64,10 @@ REPLAY_WINDOW = 180       # restart the channel that failed if it was asked for 
 RENEW_MAX = 3             # at most 3 automatic sign-ins per 30 min...
 RENEW_WINDOW = 1800
 HEAL_BLOCK = 1800         # ...and none for 30 min after Bulsat refused even fresh links
+KEEPALIVE_EVERY = 300     # tell Bulsat our session is in use every 5 min (its own player does the same)
+ENDED_GRACE = 3           # a channel stopped by itself: wait 3 s - did you just switch to another one?
+ENDED_MAX = 3             # restart a channel that stops by itself at most 3 times...
+ENDED_WINDOW = 600        # ...in 10 min
 
 PROFILES = {
     '0': {'ua': ('Mozilla/5.0 (SMART-TV; Linux; Tizen 2.3) AppleWebkit/538.1 '
@@ -410,7 +418,11 @@ class Updater(object):
             ttl = bulsat.link_ttl(kept)
             res['link_hours'] = (ttl or 0) / 3600.0
             st.save(ts=now, sig=s.playlist_sig(), channels=len(kept),
-                    links_expire=(now + ttl) if ttl else 0, app_version=s.version)
+                    links_expire=(now + ttl) if ttl else 0, app_version=s.version,
+                    # the session these links belong to - the service keeps it alive
+                    session=client.session, session_ua=prof['ua'], session_at=now,
+                    session_ch=next((c['epg_name'] for c in kept if 'program' in c),
+                                    kept[0]['epg_name'] if kept else ''))
             log('Playlist: %d channels, %s, links valid %s, next refresh %s (%.1fs)' % (
                 len(kept), 'CHANGED' if res['m3u_changed'] else 'unchanged',
                 ('%.1f h' % (ttl / 3600.0)) if ttl else 'unknown',
@@ -626,22 +638,43 @@ def quiet_moment(player, st, now=None):
 
 
 class Player(xbmc.Player):
-    """Tells the service when something failed to play / a Live TV channel really plays."""
+    """Tells the service when something failed to play, a Live TV channel really
+    plays, or a live channel stopped by itself (live TV never ends - if Kodi
+    reaches "the end", the stream ran dry)."""
 
     def __init__(self):
         xbmc.Player.__init__(self)
         self.error_at = 0.0
         self.live_ok_at = 0.0
+        self.live = None            # the live channel playing now (its pvr:// path, if Kodi tells it)
+        self.ended = None           # {'path', 'when'}: it stopped by itself
+        try:
+            if self.isPlaying():    # SpaceXTV (re)started while a channel plays (e.g. after an update)
+                self.onAVStarted()
+        except Exception:
+            pass
 
     def onPlayBackError(self):
         self.error_at = time.time()
+        self.live = None
 
     def onAVStarted(self):
         try:
-            if self.getPlayingFile().startswith('pvr://'):
-                self.live_ok_at = time.time()
+            f = self.getPlayingFile()
         except Exception:
-            pass
+            f = ''
+        if f.startswith('pvr://'):
+            self.live_ok_at = time.time()
+        self.live = f if (f.startswith('pvr://channels/') or '.bulsat.' in f) else None
+
+    def onPlayBackStopped(self):    # you pressed stop
+        self.live = None
+
+    def onPlayBackEnded(self):      # the stream ran dry
+        if self.live:
+            self.ended = {'path': self.live if self.live.startswith('pvr://') else None,
+                          'when': time.time()}
+        self.live = None
 
 
 class Doctor(object):
@@ -650,6 +683,7 @@ class Doctor(object):
     failed", although the links say "valid 10 h". The doctor notices it:
 
       * a channel failed to play -> check that link; refused? renew + restart that channel
+      * a channel stopped by itself -> same; links fine? just start it again
       * Kodi just started        -> check the links once
       * someone uses Kodi (not watching) -> check every 15 min
       (one small request each; nothing happens if the links work)
@@ -670,6 +704,8 @@ class Doctor(object):
         self.renewals = []
         self.blocked_until = 0.0
         self.last = None                    # result of the last renewal
+        self.end = None                     # a live channel that stopped by itself (waiting a moment)
+        self.restarts = []                  # when we restarted a channel that stopped by itself
 
     def reset(self):
         """Settings changed (other account / profile?): forget earlier refusals."""
@@ -681,10 +717,16 @@ class Doctor(object):
         """Cheap - called about every second while the service sleeps.
         True = a channel just failed to play."""
         now = time.time()
-        if self.player.error_at > self.err_seen or now - self.polled >= WATCH_EVERY:
+        if self.player.error_at > self.err_seen or self.player.ended or now - self.polled >= WATCH_EVERY:
             self.polled = now
             self.watch.poll()
-        return self.watch.failed is not None or self.player.error_at > self.err_seen
+        return (self.watch.failed is not None or self.player.error_at > self.err_seen
+                or self.player.ended is not None or self.watch.ended is not None)
+
+    def session_gone(self):
+        """The keep-alive found our session ended: check at the next chance (when
+        someone uses Kodi - never sign in behind anyone's back)."""
+        self.check_at = 0.0
 
     def _take_failure(self):
         self.watch.poll()
@@ -700,53 +742,91 @@ class Doctor(object):
                     f = {'when': self.player.error_at, 'path': None, 'url': None}
         return f
 
+    def _take_ended(self):
+        """A live channel that stopped by itself - from Kodi's player and/or its log."""
+        self.watch.poll()
+        we, pe = self.watch.take_ended(), self.player.ended
+        self.player.ended = None
+        if not (we or pe):
+            return None
+        e = dict(we or {'path': None, 'url': None, 'when': pe['when']})
+        if pe:
+            e['path'] = e.get('path') or pe.get('path')
+            e['when'] = min(e['when'], pe['when'])
+        lo = self.watch.last_open
+        if not e.get('path') and lo and pvr.is_live(lo) and 0 <= e['when'] - lo['when'] < 24 * 3600:
+            e['path'], e['url'] = lo['path'], lo.get('url')      # Kodi only gave the stream link
+        return e if e.get('path') else None
+
     def tick(self, s, monitor, ctx):
         """From the service loop. Does nothing while SpaceXTV is busy (failures wait)."""
         if is_busy():
             return
         if not (s.has_login() and s.reload_pvr and os.path.exists(s.m3u_path)):
             self._take_failure()                    # nothing SpaceXTV could fix yet
+            self._take_ended()
+            self.end = None
             return
         f = self._take_failure()
         if f:
             self._on_failure(s, monitor, ctx, f)
-        else:
+            return
+        self.end = self._take_ended() or self.end
+        if self.end and time.time() - self.end['when'] >= ENDED_GRACE:
+            e, self.end = self.end, None
+            self._on_failure(s, monitor, ctx, e, ended=True)
+        elif not self.end:
             self._maybe_check(s, monitor, ctx)
 
-    def _on_failure(self, s, monitor, ctx, f):
+    def _on_failure(self, s, monitor, ctx, f, ended=False):
+        """A channel failed to start - or (ended=True) a live channel stopped by itself."""
+        what = 'stopped by itself' if ended else 'failed to play'
         path = f.get('path')
         if path and not (path.startswith('pvr://') and pvr.PVR_ID in path):
             return                                  # not one of our Live TV channels
-        if self.player.live_ok_at > f['when']:
+        if ended and self.player.isPlaying():
+            return                                  # you switched to something else
+        if not ended and self.player.live_ok_at > f['when']:
             return                                  # a channel has played since - the links work
         url = (f.get('url') or '').split('|')[0]
         if url and '.bulsat.' not in '.' + urlparse(url).netloc:
             return
         if pvr.last_ready() > f['when']:
-            # it failed while Live TV was being reloaded with fresh links: just start it again
+            # it stopped/failed while Live TV was being reloaded with fresh links: just start it again
             if time.time() - f['when'] < REPLAY_WINDOW:
                 self._replay_failed(f)
             return
         if time.time() < self.blocked_until:
-            log('A channel failed to play - Bulsat refused fresh links a moment ago, next try after %s' % (
-                time.strftime('%H:%M', time.localtime(self.blocked_until))))
+            log('A channel %s - Bulsat refused fresh links a moment ago, next try after %s' % (
+                what, time.strftime('%H:%M', time.localtime(self.blocked_until))))
             return
+        if ended:
+            now = time.time()
+            self.restarts = [x for x in self.restarts if now - x < ENDED_WINDOW]
+            if len(self.restarts) >= ENDED_MAX:
+                log('A channel stopped by itself again (%d times in %d min) - not starting it again' % (
+                    len(self.restarts), ENDED_WINDOW // 60))
+                return
+            self.restarts.append(now)
         text = _read_text(s.m3u_path)
         links = dict((l[0], l[1]) for l in bulsat.playlist_links(text))
         if ctx['pending'] or (url and url not in links):
             # Live TV still has older links than the ones saved - are the saved ones good?
             if bulsat.playlist_link_state(text) != bulsat.LINK_DEAD:
-                log('A channel failed to play - Live TV still had the previous links, loading the new ones')
+                log('A channel %s - Live TV still had the previous links, loading the new ones' % what)
                 if self.renew(s, monitor, f, sign_in=False) == 'ok':
                     ctx['pending'] = False
             else:
-                self._heal(s, monitor, ctx, f, 'a channel failed to play, saved links refused too')
+                self._heal(s, monitor, ctx, f, 'a channel %s, saved links refused too' % what)
             return
         state = bulsat.check_link(url, links[url]) if url else bulsat.playlist_link_state(text)
-        log('A channel failed to play - link check: %s' % state)
+        log('A channel %s - link check: %s' % (what, state))
         if state == bulsat.LINK_DEAD:
-            self._heal(s, monitor, ctx, f, 'a channel failed to play')
-        # ok: that channel itself has a problem; unknown: no internet - renewing would not help
+            self._heal(s, monitor, ctx, f, 'a channel ' + what)
+        elif ended:
+            # the links work - a short hiccup (network / Bulsat's server): just start it again
+            self._replay_failed(f, L(30174))
+        # failed to play: ok = that channel itself has a problem; unknown = no internet - renewing would not help
 
     def _maybe_check(self, s, monitor, ctx):
         now = time.time()
@@ -874,13 +954,45 @@ class Doctor(object):
                 return hit[1]
         return None
 
-    def _replay_failed(self, f):
+    def _replay_failed(self, f, note=None):
         if self.player.isPlaying() or not f.get('path'):
             return
         hit = pvr.find_channel(pvr.channel_group(f['path']), pvr.path_uid(f['path']))
         if hit and pvr.play_channel(hit[0]):
-            log('Restarted "%s" - it was asked for while Live TV was reloading' % hit[1])
-            notify(L(30172) % hit[1], 6000)
+            log('Restarted "%s" - %s' % (hit[1], 'it stopped by itself, the links work' if note
+                                         else 'it was asked for while Live TV was reloading'))
+            notify(note or (L(30172) % hit[1]), 6000)
+
+
+class KeepAlive(object):
+    """Every 5 min: "what's on now?" with our Bulsat session - exactly what Bulsat's
+    own player does while you watch. Without it Bulsat ends the session about an
+    hour after the last sign-in and every channel stops. Never signs in."""
+
+    def __init__(self):
+        self.next = 0.0
+        self.session = None
+        self.result = None
+
+    def tick(self, s, doctor):
+        now = time.time()
+        if now < self.next or not s.has_login():
+            return
+        self.next = now + KEEPALIVE_EVERY
+        st = State(s)
+        session = st.get('session')
+        if not session or (session == self.session and self.result == bulsat.SESSION_GONE):
+            return                                  # nothing to keep alive (yet / any more)
+        r = bulsat.keepalive(s.base, session, st.get('session_ua'), st.get('session_ch'), s.timeout)
+        if r == bulsat.SESSION_GONE and (session != self.session or self.result != r):
+            log('Bulsat ended our session (signed in on another device?) - '
+                'new links as soon as someone uses Kodi or a channel stops')
+            doctor.session_gone()
+        elif r == bulsat.SESSION_OK and (session != self.session or self.result != r):
+            log('Keeping the Bulsat session alive (every %d min)' % (KEEPALIVE_EVERY // 60), debug=True)
+        if r == bulsat.SESSION_UNKNOWN:
+            self.next = now + min(KEEPALIVE_EVERY, 60)    # no answer: try again in a minute
+        self.session, self.result = session, r
 
 
 # --------------------------------------------------------------------------- #
@@ -923,6 +1035,7 @@ def run_service():
     started = time.time()
     net_ready = started + BOOT_NET_WAIT     # network work waits for Wi-Fi; the sign-in window does not
     doctor = Doctor(player, started)
+    keeper = KeepAlive()
 
     # one-time move from the old "Space Plug-In" add-on
     if pvr.migrate_settings(xbmcaddon.Addon(ADDON_ID)):
@@ -953,8 +1066,13 @@ def run_service():
             user_until = time.time() + 120
             doctor.reset()
 
-        # a channel failed to play / Kodi just started / quick check: renew dead links
+        # a channel failed to play or stopped / Kodi just started / quick check: renew dead links
         doctor.tick(s, monitor, ctx)
+        if time.time() >= net_ready:
+            try:
+                keeper.tick(s, doctor)              # keep the Bulsat session (and so the links) alive
+            except Exception as e:
+                log('Keep-alive failed: %s' % e, debug=True)
         now = time.time()
 
         if now >= next_try and not is_busy():

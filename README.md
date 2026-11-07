@@ -154,10 +154,11 @@ Missed the welcome window? **Add-ons → Program add-ons → SpaceXTV → Sign i
 | When | What SpaceXTV does |
 |---|---|
 | First start | Asks for your username and password, sets up PVR IPTV Simple Client, loads the channels and TV guide |
+| Every 5 minutes | Tells Bulsat the session is still in use, like Bulsat's own player - so the links keep working |
 | About every 9 hours | Gets fresh links before the old ones expire |
 | Every 12 hours | Refreshes the TV guide (3 days ahead) |
 | Something changed | Reloads Live TV - never while you are watching |
-| A channel won't start | Checks the link; if Bulsat stopped it - signs in again and starts the channel (about 30 s) |
+| A channel won't start or stops by itself | Checks the link; if Bulsat stopped it - signs in again and starts the same channel (about 30 s). A short hiccup - just starts it again |
 | Kodi starts | Quick link check (under 1 s) - fixes them before you pick a channel |
 | Settings changed (e.g. 18+) | Applies them right away |
 
@@ -167,7 +168,8 @@ Missed the welcome window? **Add-ons → Program add-ons → SpaceXTV → Sign i
 - One step: just username and password - no folders, hidden files or IPTV Simple settings.
 - Fresh links right before the old ones expire (about every 9 hours instead of every hour) - fewer reloads.
 - Live TV reloads only when something changed, never while you are watching.
-- Fixes stopped channels by itself.
+- Keeps the Bulsat session alive - channels don't stop after an hour.
+- Fixes stopped channels by itself and starts what you were watching again.
 - Light TV guide - fast even on cheap Android boxes.
 - Updates itself from the repository.
 - English and Bulgarian - follows Kodi's language.
@@ -182,7 +184,7 @@ Missed the welcome window? **Add-ons → Program add-ons → SpaceXTV → Sign i
 | Channels play, but no TV guide | The box's date or time is wrong: Android **Settings → Date & time** → **Automatic**, correct time zone |
 | "Login failed" | Check username and password: SpaceXTV → Settings → Account |
 | "Update failed - no internet?" | Check the connection - SpaceXTV retries by itself |
-| A channel won't start ("playback failed") | Nothing - SpaceXTV gets fresh links by itself and starts the channel within about 30 s |
+| A channel won't start ("playback failed") or stops | Nothing - SpaceXTV gets fresh links by itself and starts the channel within about 30 s |
 | "Bulsat refuses the channels" | Your account is in use on another device - SpaceXTV tries again by itself in 30 min |
 | No "TV" in the main menu | SpaceXTV → **Set up Live TV** |
 | Kodi refuses the zip | Do step 1 |
@@ -374,10 +376,11 @@ SpaceXTV презарежда сам и показва *„Готово: … к�
 | Кога | Какво прави SpaceXTV |
 |---|---|
 | Първо пускане | Пита за име и парола, настройва PVR IPTV Simple Client, зарежда каналите и ТВ програмата |
+| На всеки 5 минути | Казва на Bulsat, че сесията се ползва, както прави собственият плейър на Bulsat - и линковете продължават да работят |
 | Приблизително на всеки 9 часа | Взима нови линкове, преди старите да изтекат |
 | На всеки 12 часа | Обновява ТВ програмата (3 дни напред) |
 | Нещо се е променило | Презарежда телевизията - никога докато гледате |
-| Канал не тръгва | Проверява линка; ако Bulsat го е спрял - влиза наново и пуска канала (приблизително 30 сек.) |
+| Канал не тръгва или спре сам | Проверява линка; ако Bulsat го е спрял - влиза наново и пуска същия канал (приблизително 30 сек.). При кратко прекъсване - просто го пуска отново |
 | При пускане на Kodi | Бърза проверка на линковете (под 1 сек.) - оправя ги, преди да изберете канал |
 | Променени настройки (напр. 18+) | Прилага ги веднага |
 
@@ -387,7 +390,8 @@ SpaceXTV презарежда сам и показва *„Готово: … к�
 - Една стъпка: само име и парола - без папки, скрити файлове и настройки на IPTV Simple.
 - Нови линкове точно преди старите да изтекат (приблизително на 9 часа вместо на всеки час) - по-малко презареждания.
 - Телевизията се презарежда само при промяна и никога докато гледате.
-- Сам оправя спрели канали.
+- Поддържа сесията в Bulsat жива - каналите не спират след час.
+- Сам оправя спрели канали и пуска отново това, което гледате.
 - Лека ТВ програма - бърз и на евтини Android боксове.
 - Обновява се сам през хранилището.
 - Български и английски - според езика на Kodi.
@@ -402,7 +406,7 @@ SpaceXTV презарежда сам и показва *„Готово: … к�
 | Каналите вървят, но няма ТВ програма | Датата или часът на бокса са грешни: Android **Настройки → Дата и час** → **Автоматично**, часова зона **София** |
 | „Неуспешен вход“ | Проверете името и паролата: SpaceXTV → Настройки → Акаунт |
 | „Неуспешно обновяване - няма интернет?“ | Проверете интернета - SpaceXTV опитва пак сам |
-| Канал не тръгва („неуспешно възпроизвеждане“) | Нищо - SpaceXTV сам взима нови връзки и пуска канала след приблизително 30 сек. |
+| Канал не тръгва („неуспешно възпроизвеждане“) или спре | Нищо - SpaceXTV сам взима нови връзки и пуска канала след приблизително 30 сек. |
 | „Bulsat отказва каналите“ | Акаунтът се ползва на друго устройство - SpaceXTV опитва пак сам след 30 мин. |
 | Няма „Телевизия“ в главното меню | SpaceXTV → **Настрой телевизията** |
 | Kodi не приема zip файла | Направете стъпка 1 |
