@@ -1,0 +1,48 @@
+# Every push to main rebuilds the Kodi repository (gh-pages -> https://beboss.github.io/spacextv/).
+# A new version in plugin.program.spacextv/addon.xml also gets its own GitHub release.
+name: Publish
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build the Kodi repository and zips
+        run: python3 tools/build_repo.py build
+
+      - name: Update the Kodi repository (GitHub Pages)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd build/site
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Kodi repository - SpaceXTV $(cat ../VERSION)"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
+
+      - name: GitHub release for a new version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="$(cat build/VERSION)"
+          if gh release view "v$v" >/dev/null 2>&1; then
+            echo "Release v$v already exists"
+            exit 0
+          fi
+          gh release create "v$v" build/dist/* --target "$GITHUB_SHA" \
+            --title "SpaceXTV $v" --notes-file build/NOTES.md --latest

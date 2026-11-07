@@ -1,0 +1,369 @@
+# Kodi Media Center language file
+# Addon Name: SpaceXTV
+# Addon id: plugin.program.spacextv
+# Author: Blagovest Klisarski - https://blagovestklisarski.com
+msgid ""
+msgstr ""
+"Project-Id-Version: SpaceXTV\n"
+"Language-Team: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en_gb\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "#30000"
+msgid "SpaceXTV"
+msgstr ""
+
+msgctxt "#30001"
+msgid "Account"
+msgstr ""
+
+msgctxt "#30002"
+msgid "Updates & TV guide"
+msgstr ""
+
+msgctxt "#30003"
+msgid "Channels"
+msgstr ""
+
+msgctxt "#30004"
+msgid "Advanced"
+msgstr ""
+
+msgctxt "#30005"
+msgid "Tools"
+msgstr ""
+
+msgctxt "#30010"
+msgid "Log in with username and password"
+msgstr ""
+
+msgctxt "#30011"
+msgid "Username"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Password"
+msgstr ""
+
+msgctxt "#30013"
+msgid "Login file URL (folder with login.txt)"
+msgstr ""
+
+msgctxt "#30014"
+msgid "Device profile"
+msgstr ""
+
+msgctxt "#30015"
+msgid "Samsung TV"
+msgstr ""
+
+msgctxt "#30016"
+msgid "Android TV"
+msgstr ""
+
+msgctxt "#30017"
+msgid "Catch-up / replay (uses Android TV profile)"
+msgstr ""
+
+msgctxt "#30020"
+msgid "Refresh channel list automatically (before stream links expire)"
+msgstr ""
+
+msgctxt "#30021"
+msgid "Refresh channel list every (minutes)"
+msgstr ""
+
+msgctxt "#30022"
+msgid "Use my own EPG source (don't download the TV guide)"
+msgstr ""
+
+msgctxt "#30023"
+msgid "Refresh TV guide every (hours)"
+msgstr ""
+
+msgctxt "#30024"
+msgid "TV guide days ahead (fewer = faster)"
+msgstr ""
+
+msgctxt "#30025"
+msgid "Reload Live TV when the channel list changes"
+msgstr ""
+
+msgctxt "#30026"
+msgid "Show progress bar during background updates"
+msgstr ""
+
+msgctxt "#30030"
+msgid "Show adult channels (18+)"
+msgstr ""
+
+msgctxt "#30031"
+msgid "Group channels by genre"
+msgstr ""
+
+msgctxt "#30032"
+msgid "Add User-Agent to stream links (recommended)"
+msgstr ""
+
+msgctxt "#30033"
+msgid "Use custom channel logos"
+msgstr ""
+
+msgctxt "#30034"
+msgid "Logos are in a local folder"
+msgstr ""
+
+msgctxt "#30035"
+msgid "Logos web address (URL)"
+msgstr ""
+
+msgctxt "#30036"
+msgid "Local logos folder"
+msgstr ""
+
+msgctxt "#30040"
+msgid "Login retry attempts"
+msgstr ""
+
+msgctxt "#30041"
+msgid "Network timeout (seconds)"
+msgstr ""
+
+msgctxt "#30042"
+msgid "Debug logging"
+msgstr ""
+
+msgctxt "#30043"
+msgid "Also copy playlist and TV guide to a folder"
+msgstr ""
+
+msgctxt "#30044"
+msgid "Copy to folder"
+msgstr ""
+
+msgctxt "#30045"
+msgid "Run a command after each update"
+msgstr ""
+
+msgctxt "#30046"
+msgid "Kodi built-in command"
+msgstr ""
+
+msgctxt "#30047"
+msgid "System command / script"
+msgstr ""
+
+msgctxt "#30050"
+msgid "Update channels and TV guide now"
+msgstr ""
+
+msgctxt "#30051"
+msgid "Set up Live TV (PVR IPTV Simple)"
+msgstr ""
+
+msgctxt "#30052"
+msgid "Files for PVR IPTV Simple Client (Local path):"
+msgstr ""
+
+msgctxt "#30053"
+msgid "SpaceXTV by Blagovest Klisarski  -  blagovestklisarski.com"
+msgstr ""
+
+msgctxt "#30100"
+msgid "Welcome to SpaceXTV![CR][CR]Sign in with your Bulsat account and your channels will be ready in about a minute."
+msgstr ""
+
+msgctxt "#30101"
+msgid "Later"
+msgstr ""
+
+msgctxt "#30102"
+msgid "Sign in"
+msgstr ""
+
+msgctxt "#30103"
+msgid "Bulsat username"
+msgstr ""
+
+msgctxt "#30104"
+msgid "Password"
+msgstr ""
+
+msgctxt "#30105"
+msgid "To sign in, open SpaceXTV from Add-ons"
+msgstr ""
+
+msgctxt "#30106"
+msgid "Login failed - check username and password"
+msgstr ""
+
+msgctxt "#30107"
+msgid "Update failed - no internet? Retrying in a few minutes"
+msgstr ""
+
+msgctxt "#30108"
+msgid "Settings imported from Space Plug-In"
+msgstr ""
+
+msgctxt "#30109"
+msgid "Old Space Plug-In switched off - you can uninstall it"
+msgstr ""
+
+msgctxt "#30110"
+msgid "Live TV now uses SpaceXTV"
+msgstr ""
+
+msgctxt "#30111"
+msgid "All set! %d channels - open TV in the Kodi main menu"
+msgstr ""
+
+msgctxt "#30112"
+msgid "Install \"PVR IPTV Simple Client\", then open SpaceXTV > Set up Live TV"
+msgstr ""
+
+msgctxt "#30113"
+msgid "Please finish signing in in the open window"
+msgstr ""
+
+msgctxt "#30114"
+msgid "updated %s, %s channels"
+msgstr ""
+
+msgctxt "#30115"
+msgid "not updated yet"
+msgstr ""
+
+msgctxt "#30117"
+msgid "Sign in and load channels"
+msgstr ""
+
+msgctxt "#30119"
+msgid "Settings"
+msgstr ""
+
+msgctxt "#30120"
+msgid "Run \"Update now\" first"
+msgstr ""
+
+msgctxt "#30121"
+msgid "Live TV is already set up"
+msgstr ""
+
+msgctxt "#30122"
+msgid "Live TV set up - channels are loading"
+msgstr ""
+
+msgctxt "#30123"
+msgid "An update is already running, please wait"
+msgstr ""
+
+msgctxt "#30125"
+msgid "Update failed - check your internet connection"
+msgstr ""
+
+msgctxt "#30126"
+msgid "Channels updated (%d), TV guide failed - try again later"
+msgstr ""
+
+msgctxt "#30127"
+msgid "Done: %d channels, TV guide %d days"
+msgstr ""
+
+msgctxt "#30128"
+msgid "Done: %d channels"
+msgstr ""
+
+msgctxt "#30129"
+msgid "Live TV is not set up yet - choose \"Set up Live TV\""
+msgstr ""
+
+msgctxt "#30130"
+msgid "Done"
+msgstr ""
+
+msgctxt "#30131"
+msgid "Install \"PVR IPTV Simple Client\" first"
+msgstr ""
+
+msgctxt "#30140"
+msgid "Signing in..."
+msgstr ""
+
+msgctxt "#30141"
+msgid "Loading channel list..."
+msgstr ""
+
+msgctxt "#30142"
+msgid "Building playlist..."
+msgstr ""
+
+msgctxt "#30143"
+msgid "TV guide starts in a moment..."
+msgstr ""
+
+msgctxt "#30144"
+msgid "Downloading TV guide..."
+msgstr ""
+
+msgctxt "#30145"
+msgid "TV guide %d/%d  %s"
+msgstr ""
+
+msgctxt "#30146"
+msgid "Saving TV guide..."
+msgstr ""
+
+msgctxt "#30147"
+msgid "Updating..."
+msgstr ""
+
+msgctxt "#30148"
+msgid "Starting..."
+msgstr ""
+
+msgctxt "#30149"
+msgid "Enter your login first"
+msgstr ""
+
+msgctxt "#30150"
+msgid "Switching Live TV to the new channel list..."
+msgstr ""
+
+msgctxt "#30151"
+msgid "Loading channels into Live TV, please wait..."
+msgstr ""
+
+msgctxt "#30154"
+msgid "Installing PVR IPTV Simple Client..."
+msgstr ""
+
+msgctxt "#30155"
+msgid "Live TV is still loading - give it a minute. No channels? SpaceXTV > Update now"
+msgstr ""
+
+msgctxt "#30160"
+msgid "Show SpaceXTV log"
+msgstr ""
+
+msgctxt "#30161"
+msgid "No SpaceXTV entries in the Kodi log yet."
+msgstr ""
+
+msgctxt "#30170"
+msgid "Channels stopped working - getting fresh links..."
+msgstr ""
+
+msgctxt "#30171"
+msgid "Channels work again - pick a channel"
+msgstr ""
+
+msgctxt "#30172"
+msgid "Channels work again - starting %s"
+msgstr ""
+
+msgctxt "#30173"
+msgid "Bulsat refuses the channels - is your account in use on another device? Next try in 30 min"
+msgstr ""

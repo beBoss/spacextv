@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- SpaceXTV settings. Labels are string ids from resources/language/*/strings.po (English + Bulgarian).
+     Ids match the old Space Plug-In so settings can be imported.
+     Note: visible="eq(-N,...)" counts settings upwards inside the same category. -->
+<settings>
+
+    <category label="30001">
+        <setting label="30010" type="bool"   id="logontype"   default="true"/>
+        <setting label="30011" type="text"   id="username"    default="" visible="eq(-1,true)"/>
+        <setting label="30012" type="text"   id="password"    default="" option="hidden" visible="eq(-2,true)"/>
+        <setting label="30013" type="text"   id="urllogin"    default="" visible="eq(-3,false)"/>
+        <setting label="30014" type="enum"   id="dev_id_new1" lvalues="30015|30016" default="0"/>
+        <setting label="30017" type="bool"   id="use_rec_new" default="false"/>
+
+        <setting label="" type="text" id="base"        default="https://api.iptv.bulsat.com" visible="false"/>
+        <setting label="" type="text" id="app_ver"     default="1.0.3" visible="false"/>
+        <setting label="" type="bool" id="migrated"    default="false" visible="false"/>
+        <setting label="" type="bool" id="pvr_checked" default="false" visible="false"/>
+        <setting label="" type="bool" id="welcomed"    default="false" visible="false"/>
+    </category>
+
+    <category label="30002">
+        <setting label="30020" type="bool"   id="refresh_auto"  default="true"/>
+        <setting label="30021" type="slider" id="refresh_new"   default="60" range="10,5,720" option="int" visible="eq(-1,false)"/>
+        <setting label="30022" type="bool"   id="ext_epg"       default="false"/>
+        <setting label="30023" type="slider" id="epg_refresh"   default="12" range="1,1,48" option="int" visible="eq(-1,false)"/>
+        <setting label="30024" type="slider" id="epg_days"      default="3"  range="1,1,7"  option="int" visible="eq(-2,false)"/>
+        <setting label="30025" type="bool"   id="en_reload_pvr" default="true"/>
+        <setting label="30026" type="bool"   id="show_progress" default="false"/>
+    </category>
+
+    <category label="30003">
+        <setting label="30030" type="bool"   id="xxx"              default="false"/>
+        <setting label="30031" type="bool"   id="en_group_ch"      default="true"/>
+        <setting label="30032" type="bool"   id="use_ua_new"       default="true"/>
+        <setting label="30033" type="bool"   id="use_ext_logos"    default="false"/>
+        <setting label="30034" type="bool"   id="use_local_logos"  default="false" visible="eq(-1,true)"/>
+        <setting label="30035" type="text"   id="logos_path"       default=""      visible="eq(-2,true) + eq(-1,false)"/>
+        <setting label="30036" type="folder" id="logos_local_path" default=""      visible="eq(-3,true) + eq(-2,true)"/>
+    </category>
+
+    <category label="30004">
+        <setting label="30040" type="slider" id="repeats"       default="3"  range="1,1,10" option="int"/>
+        <setting label="30041" type="slider" id="timeout"       default="10" range="3,1,30" option="int"/>
+        <setting label="30042" type="bool"   id="dbg"           default="false"/>
+        <setting label="30043" type="bool"   id="en_cp"         default="false"/>
+        <setting label="30044" type="folder" id="w_path"        default="" option="writeable" visible="eq(-1,true)"/>
+        <setting label="30045" type="bool"   id="en_custom_cmd" default="false"/>
+        <setting label="30046" type="text"   id="builtin_cmd"   default="" visible="eq(-1,true)"/>
+        <setting label="30047" type="text"   id="script_cmd"    default="" visible="eq(-2,true)"/>
+    </category>
+
+    <category label="30005">
+        <setting label="30050" type="action" action="RunScript(plugin.program.spacextv,update)" option="close"/>
+        <setting label="30051" type="action" action="RunScript(plugin.program.spacextv,setup_pvr)" option="close"/>
+        <setting label="30160" type="action" action="RunScript(plugin.program.spacextv,log)" option="close"/>
+        <setting label="30052" type="lsep"/>
+        <setting label="special://profile/addon_data/plugin.program.spacextv/spacextv.m3u" type="lsep"/>
+        <setting label="special://profile/addon_data/plugin.program.spacextv/spacextv.xml.gz" type="lsep"/>
+        <setting label="30053" type="lsep"/>
+    </category>
+
+</settings>
