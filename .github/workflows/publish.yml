@@ -41,7 +41,8 @@ jobs:
         run: |
           v="$(cat build/VERSION)"
           if gh release view "v$v" >/dev/null 2>&1; then
-            echo "Release v$v already exists"
+            echo "Release v$v already exists - refreshing its repository zip"
+            gh release upload "v$v" build/dist/repository.spacextv.zip --clobber
             exit 0
           fi
           gh release create "v$v" build/dist/* --target "$GITHUB_SHA" \

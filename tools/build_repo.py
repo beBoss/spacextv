@@ -3,9 +3,16 @@
 
     python3 tools/build_repo.py OUT
 
-OUT/site/  -> GitHub Pages = the Kodi repository (addons.xml, md5, zips, icons, index.html)
-OUT/dist/  -> files attached to the GitHub release
+OUT/site/       -> GitHub Pages
+  index.html, repository.spacextv.zip   the folder people add in Kodi's File manager
+  repo/                                 the Kodi repository (addons.xml, md5, zips, icons)
+OUT/dist/       -> files attached to the GitHub release
 OUT/VERSION, OUT/NOTES.md -> SpaceXTV version and release notes
+
+Why repo/ is a separate folder: once Kodi has listed the source folder (step
+"Install from zip file"), it remembers that listing and answers "not there"
+for any other file in that folder without asking the server - the repository
+would then say "Could not connect" until Kodi restarts.
 
 Only the standard library - runs the same on a Mac and on GitHub Actions.
 """
@@ -22,7 +29,22 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLUGIN = 'plugin.program.spacextv'
 REPO = 'repository.spacextv'
 URL = 'https://beboss.github.io/spacextv/'
+DATA = 'repo'
+DATA_URL = URL + DATA + '/'
 GITHUB = 'https://github.com/beBoss/spacextv'
+
+
+def check_repo_urls():
+    """The repository add-on must read everything from repo/, never from the source folder."""
+    root = ET.parse(os.path.join(ROOT, REPO, 'addon.xml')).getroot()
+    dirs = root.findall(".//extension[@point='xbmc.addon.repository']/dir")
+    if not dirs:
+        sys.exit('%s: no <dir> in the repository extension' % REPO)
+    for d in dirs:
+        for tag in ('info', 'checksum', 'datadir'):
+            value = (d.findtext(tag) or '').strip()
+            if not value.startswith(DATA_URL):
+                sys.exit('%s: <%s> must start with %s, not %r' % (REPO, tag, DATA_URL, value))
 
 
 def junk(name):
@@ -109,9 +131,11 @@ then <b>Install from zip file</b> &rarr; <code>%(zip)s</code></p>
 
 
 def main(out):
+    check_repo_urls()
     site, dist = os.path.join(out, 'site'), os.path.join(out, 'dist')
+    data = os.path.join(site, DATA)
     shutil.rmtree(out, ignore_errors=True)
-    os.makedirs(site)
+    os.makedirs(data)
     os.makedirs(dist)
 
     bodies, versions, news = [], {}, ''
@@ -121,7 +145,7 @@ def main(out):
         bodies.append(body)
         if addon_id == PLUGIN:
             news = n
-        folder = os.path.join(site, addon_id)
+        folder = os.path.join(data, addon_id)
         os.makedirs(folder)
         # Kodi's updater: <datadir>/<id>/<id>-<version>.zip, artwork next to it
         zpath = os.path.join(folder, '%s-%s.zip' % (addon_id, version))
@@ -137,20 +161,20 @@ def main(out):
     addons = ('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<addons>\n'
               + '\n'.join(bodies) + '\n</addons>\n').encode('utf-8')
     ET.fromstring(addons)       # must be valid XML
-    with open(os.path.join(site, 'addons.xml'), 'wb') as f:
+    with open(os.path.join(data, 'addons.xml'), 'wb') as f:
         f.write(addons)
-    with open(os.path.join(site, 'addons.xml.md5'), 'w') as f:
+    with open(os.path.join(data, 'addons.xml.md5'), 'w') as f:
         f.write(hashlib.md5(addons).hexdigest())
 
     # fixed names for links that never change
     repo_zip = REPO + '.zip'
-    shutil.copy2(os.path.join(site, REPO, '%s-%s.zip' % (REPO, versions[REPO])),
+    shutil.copy2(os.path.join(data, REPO, '%s-%s.zip' % (REPO, versions[REPO])),
                  os.path.join(site, repo_zip))
     with open(os.path.join(site, 'index.html'), 'w', encoding='utf-8') as f:
         f.write(index_html(repo_zip, versions[PLUGIN]))
     open(os.path.join(site, '.nojekyll'), 'w').close()
 
-    shutil.copy2(os.path.join(site, PLUGIN, '%s-%s.zip' % (PLUGIN, versions[PLUGIN])), dist)
+    shutil.copy2(os.path.join(data, PLUGIN, '%s-%s.zip' % (PLUGIN, versions[PLUGIN])), dist)
     shutil.copy2(os.path.join(site, repo_zip), dist)
 
     with open(os.path.join(out, 'VERSION'), 'w') as f:

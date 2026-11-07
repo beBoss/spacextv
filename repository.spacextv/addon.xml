@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="repository.spacextv" name="SpaceXTV Repository" version="2026.11.07.1607.7" provider-name="Blagovest Klisarski">
+<addon id="repository.spacextv" name="SpaceXTV Repository" version="2026.11.07.1755.7" provider-name="Blagovest Klisarski">
   <extension point="xbmc.addon.repository" name="SpaceXTV Repository">
     <dir>
-      <info compressed="false">https://beboss.github.io/spacextv/addons.xml</info>
-      <checksum>https://beboss.github.io/spacextv/addons.xml.md5</checksum>
-      <datadir zip="true">https://beboss.github.io/spacextv/</datadir>
+      <info compressed="false">https://beboss.github.io/spacextv/repo/addons.xml</info>
+      <checksum>https://beboss.github.io/spacextv/repo/addons.xml.md5</checksum>
+      <datadir zip="true">https://beboss.github.io/spacextv/repo/</datadir>
     </dir>
   </extension>
   <extension point="xbmc.addon.metadata">
