@@ -29,8 +29,8 @@ jobs:
         run: |
           cd build/site
           git init -q -b gh-pages
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "Blagovest Klisarski"
+          git config user.email "1630459+beBoss@users.noreply.github.com"
           git add -A
           git commit -q -m "Kodi repository - SpaceXTV $(cat ../VERSION)"
           git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
