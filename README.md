@@ -10,6 +10,7 @@
 [![Version](https://img.shields.io/github/v/release/beBoss/spacextv?label=version&color=f26b3a)](https://github.com/beBoss/spacextv/releases/latest)
 [![Kodi 19 | 20 | 21](https://img.shields.io/badge/Kodi-19%20%7C%2020%20%7C%2021-17B2E7?logo=kodi&logoColor=white)](https://kodi.tv)
 [![License GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE.txt)
+[![Forum kodibg.org](https://img.shields.io/badge/forum-kodibg.org-555)](https://kodibg.org/forum/thread-1777.html)
 
 **English** · [Български](#български)
 
@@ -228,7 +229,7 @@ If the same account signs in on another device, Bulsat may stop the links on the
 
 <details><summary><b>Something doesn't work?</b></summary>
 
-SpaceXTV → **Show SpaceXTV log** → take a photo of the screen and send it with your question.
+SpaceXTV → **Show SpaceXTV log** → take a photo of the screen and post it with your question in the [forum thread](https://kodibg.org/forum/thread-1777.html) (Bulgarian or English).
 </details>
 
 <br>
@@ -450,7 +451,7 @@ SpaceXTV → Настройки → Акаунт → **Профил на уст�
 
 <details><summary><b>Нещо не работи?</b></summary>
 
-SpaceXTV → **Покажи дневника на SpaceXTV** → снимайте екрана и го пратете заедно с въпроса си.
+SpaceXTV → **Покажи дневника на SpaceXTV** → снимайте екрана и го пуснете заедно с въпроса си в [темата във форума](https://kodibg.org/forum/thread-1777.html).
 </details>
 
 <br>
